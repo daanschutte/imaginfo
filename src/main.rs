@@ -16,6 +16,10 @@ struct Opt {
     #[structopt(parse(from_os_str))]
     path: PathBuf,
 
+    /// Enable debugging
+    #[structopt(short, long)]
+    debug: bool,
+
     /// Follow directories recursively
     #[structopt(short, long)]
     recurse: bool,
@@ -23,7 +27,13 @@ struct Opt {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let opt = Opt::from_args();
-    println!("{:?}", &opt);
+    let debug = opt.debug;
+
+    // TODO remove / improve
+    if debug {
+        println!("{:?}", &opt);
+    }
+
     let path = opt.path;
     let recurse = opt.recurse;
 
