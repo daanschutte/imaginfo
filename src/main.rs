@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fs;
 use std::fs::DirEntry;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use structopt::StructOpt;
 use walkdir::WalkDir;
@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn find_files_recurse(path: &PathBuf) -> Vec<PathBuf> {
+fn find_files_recurse(path: &Path) -> Vec<PathBuf> {
     WalkDir::new(path)
         .into_iter()
         .filter_map(|e| e.ok())
@@ -60,7 +60,7 @@ fn find_files_recurse(path: &PathBuf) -> Vec<PathBuf> {
         .collect::<Vec<PathBuf>>()
 }
 
-fn find_files_no_recurse(path: &PathBuf) -> Vec<PathBuf> {
+fn find_files_no_recurse(path: &Path) -> Vec<PathBuf> {
     fs::read_dir(&path)
         .unwrap()
         .into_iter()
@@ -77,7 +77,7 @@ fn is_hidden_walkdir(entry: &walkdir::DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| s.starts_with("."))
+        .map(|s| s.starts_with('.'))
         .unwrap_or(false)
 }
 
@@ -85,6 +85,6 @@ fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| s.starts_with("."))
+        .map(|s| s.starts_with('.'))
         .unwrap_or(false)
 }
