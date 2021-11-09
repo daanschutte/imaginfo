@@ -1,10 +1,11 @@
 use std::error::Error;
 use std::path::PathBuf;
 
+use exif::Exif;
 use log::debug;
 use structopt::StructOpt;
 
-mod dirtools;
+mod dir_tools;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -42,7 +43,31 @@ fn main() -> Result<(), Box<dyn Error>> {
         debug!("{:?}", &opt);
     }
 
-    let _files = dirtools::find_files_recurse(path, debug, max_depth);
+    let files = dir_tools::find_files_recurse(path, debug, max_depth);
+
+    let exif_data = &files
+        .unwrap()
+        .into_iter()
+        .map(|path| get_exif_data(&path))
+        .filter_map(|e| e.ok())
+        .collect::<Vec<Exif>>();
 
     Ok(())
+}
+
+fn get_exif_data(path: &PathBuf) -> Result<Exif, Box<dyn std::error::Error>> {
+    let file = std::fs::File::open(path)?;
+    let mut bufreader = std::io::BufReader::new(&file);
+    let exifreader = exif::Reader::new();
+    let exif = exifreader.read_from_container(&mut bufreader)?;
+    for f in exif.fields() {
+        println!(
+            "{} {} {}",
+            f.tag,
+            f.ifd_num,
+            f.display_value().with_unit(&exif)
+        );
+    }
+
+    Ok(exif)
 }
