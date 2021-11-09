@@ -13,8 +13,7 @@ struct Opt {
     #[structopt(parse(from_os_str))]
     input: PathBuf,
 
-    /// Set recursion
-    // we don't want to name it "speed", need to look smart
+    /// Follow directories recursively
     #[structopt(short, long)]
     recurse: bool,
 }
