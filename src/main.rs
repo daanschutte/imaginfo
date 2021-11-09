@@ -12,25 +12,27 @@ struct Opt {
     /// Input file
     #[structopt(parse(from_os_str))]
     input: PathBuf,
+
+    /// Set recursion
+    // we don't want to name it "speed", need to look smart
+    #[structopt(short, long)]
+    recurse: bool,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let opt = Opt::from_args();
     println!("{:?}", &opt);
     let path = opt.input;
-    // let entries = find_files(&path);
+    let recurse = opt.recurse;
 
-    let recurse = find_files_recurse(&path);
-    println!("Recursive dirs:");
-    recurse
-        .into_iter()
-        .for_each(|e| println!("{}", e.display()));
+    let files = if recurse {
+        find_files_recurse(&path)
+    } else {
+        find_files_no_recurse(&path)
+    };
 
-    let no_recurse = find_files_no_recurse(&path);
-    println!("Non recursive dirs:");
-    no_recurse
-        .into_iter()
-        .for_each(|e| println!("{}", e.display()));
+    println!("Dirs:");
+    files.into_iter().for_each(|e| println!("{}", e.display()));
 
     Ok(())
 }
