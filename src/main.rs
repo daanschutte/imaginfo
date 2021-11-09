@@ -1,10 +1,10 @@
 use std::error::Error;
 use std::fs;
-use std::fs::FileType;
+use std::fs::DirEntry;
 use std::path::PathBuf;
 
 use structopt::StructOpt;
-use walkdir::{DirEntry, WalkDir};
+use walkdir::WalkDir;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "Imaginfo", about = "An about section about Imaginfo")]
@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let path = opt.input;
     // let entries = find_files(&path);
 
-    let recurse = find_files_recursive(&path);
+    let recurse = find_files_recurse(&path);
     println!("Recursive dirs:");
     recurse
         .into_iter()
@@ -35,11 +35,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn find_files_recursive(path: &PathBuf) -> Vec<PathBuf> {
+fn find_files_recurse(path: &PathBuf) -> Vec<PathBuf> {
     WalkDir::new(path)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| !is_hidden_walkdir(e))
+        .filter(|e| !e.path_is_symlink())
         .filter(|e| !e.file_type().is_dir())
         .map(|e| e.path().to_path_buf())
         .collect::<Vec<PathBuf>>()
@@ -52,12 +53,13 @@ fn find_files_no_recurse(path: &PathBuf) -> Vec<PathBuf> {
         .filter_map(|e| e.ok())
         .filter(|e| !is_hidden(e))
         .filter(|e| !e.file_type().unwrap().is_dir())
+        .filter(|e| !e.file_type().unwrap().is_symlink())
         .map(|e| e.path())
         .collect::<Vec<PathBuf>>()
 }
 
 // TODO make generic
-fn is_hidden_walkdir(entry: &DirEntry) -> bool {
+fn is_hidden_walkdir(entry: &walkdir::DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
@@ -65,7 +67,7 @@ fn is_hidden_walkdir(entry: &DirEntry) -> bool {
         .unwrap_or(false)
 }
 
-fn is_hidden(entry: &std::fs::DirEntry) -> bool {
+fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
