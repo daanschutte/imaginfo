@@ -1,14 +1,15 @@
 use std::error::Error;
 use std::path::PathBuf;
 
+use log::debug;
 use structopt::StructOpt;
 
 mod dirtools;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
-name = "Imaginfo",
-about = "An application to give insights into photo metadata"
+    name = "Imaginfo",
+    about = "An application to give insights into photo metadata"
 )]
 struct Opt {
     /// Root directory from which to search
@@ -29,24 +30,19 @@ struct Opt {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    env_logger::init();
+
     let opt = Opt::from_args();
     let debug = opt.debug;
     let recurse = opt.recurse;
     let max_depth: usize = if recurse { usize::MAX } else { opt.max_depth };
     let path = &opt.path;
 
-    // TODO remove / improve
     if debug {
-        println!("{:?}", &opt);
+        debug!("{:?}", &opt);
     }
 
-    let files = dirtools::find_files_recurse(&path, max_depth);
-
-    println!("Paths:");
-    files
-        .into_iter()
-        .flatten()
-        .for_each(|e| println!("{}", e.display()));
+    let _files = dirtools::find_files_recurse(path, debug, max_depth);
 
     Ok(())
 }
