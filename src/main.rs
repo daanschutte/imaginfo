@@ -7,11 +7,11 @@ use structopt::StructOpt;
 use walkdir::WalkDir;
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "Imaginfo", about = "An about section about Imaginfo")]
+#[structopt(name = "Imaginfo", about = "An application to give insights into photo metadata")]
 struct Opt {
     /// Input file
     #[structopt(parse(from_os_str))]
-    input: PathBuf,
+    path: PathBuf,
 
     /// Follow directories recursively
     #[structopt(short, long)]
@@ -21,7 +21,7 @@ struct Opt {
 fn main() -> Result<(), Box<dyn Error>> {
     let opt = Opt::from_args();
     println!("{:?}", &opt);
-    let path = opt.input;
+    let path = opt.path;
     let recurse = opt.recurse;
 
     let files = if recurse {
@@ -74,4 +74,10 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .to_str()
         .map(|s| s.starts_with("."))
         .unwrap_or(false)
+}
+
+
+#[test]
+fn test_it_is_hidden() {
+    let hidden_file = DirEntry::new("");
 }
