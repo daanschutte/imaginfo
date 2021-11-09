@@ -7,7 +7,10 @@ use structopt::StructOpt;
 use walkdir::WalkDir;
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "Imaginfo", about = "An application to give insights into photo metadata")]
+#[structopt(
+    name = "Imaginfo",
+    about = "An application to give insights into photo metadata"
+)]
 struct Opt {
     /// Input file
     #[structopt(parse(from_os_str))]
@@ -74,10 +77,4 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .to_str()
         .map(|s| s.starts_with("."))
         .unwrap_or(false)
-}
-
-
-#[test]
-fn test_it_is_hidden() {
-    let hidden_file = DirEntry::new("");
 }
