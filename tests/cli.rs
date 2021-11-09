@@ -3,6 +3,8 @@ use std::process::Command;
 use assert_cmd::prelude::*;
 use predicates::prelude::*;
 
+// TODO use tempfile https://docs.rs/tempfile/3.2.0/tempfile/
+
 #[test]
 fn it_gives_error_if_file_does_not_exist() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("imaginfo")?;
