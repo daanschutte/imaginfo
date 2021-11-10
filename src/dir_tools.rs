@@ -43,7 +43,6 @@ fn is_hidden(entry: &walkdir::DirEntry) -> bool {
 fn log_debug(paths: &[PathBuf]) {
     paths
         .to_owned()
-        // .clone()
         .into_iter()
         .for_each(|p| debug!("Found {}", p.display()));
 }

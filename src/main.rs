@@ -1,11 +1,12 @@
 use std::error::Error;
 use std::path::PathBuf;
 
-use exif::Exif;
+use exif::{Exif, Tag};
 use log::debug;
 use structopt::StructOpt;
 
 mod dir_tools;
+mod exfiltrate;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -48,26 +49,22 @@ fn main() -> Result<(), Box<dyn Error>> {
     let exif_data = &files
         .unwrap()
         .into_iter()
-        .map(|path| get_exif_data(&path))
+        .map(|path| exfiltrate::get_exif_data(&path))
         .filter_map(|e| e.ok())
         .collect::<Vec<Exif>>();
 
+    let apertures = exif_data
+        .into_iter()
+        .map(|e| exfiltrate::get_tag_rational(Tag::FNumber, e))
+        .filter(|e| e.is_some())
+        .map(|e| e.unwrap())
+        .map(|e| e.to_f64())
+        .collect::<Vec<f64>>();
+
+    apertures
+        .clone()
+        .into_iter()
+        .for_each(|f| debug!("f: {:?}", f));
+
     Ok(())
-}
-
-fn get_exif_data(path: &PathBuf) -> Result<Exif, Box<dyn std::error::Error>> {
-    let file = std::fs::File::open(path)?;
-    let mut bufreader = std::io::BufReader::new(&file);
-    let exifreader = exif::Reader::new();
-    let exif = exifreader.read_from_container(&mut bufreader)?;
-    for f in exif.fields() {
-        println!(
-            "{} {} {}",
-            f.tag,
-            f.ifd_num,
-            f.display_value().with_unit(&exif)
-        );
-    }
-
-    Ok(exif)
 }
