@@ -46,25 +46,21 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let files = dir_tools::find_files_recurse(path, debug, max_depth);
 
-    let exif_data = &files
+    let exif_data = files
         .unwrap()
         .into_iter()
-        .map(|path| exfiltrate::get_exif_data(&path))
+        .map(|path| exfiltrate::get_exif_data(&path, debug))
         .filter_map(|e| e.ok())
         .collect::<Vec<Exif>>();
 
-    let apertures = exif_data
-        .into_iter()
+    let apertures: Vec<f64> = exif_data
+        .iter()
         .map(|e| exfiltrate::get_tag_rational(Tag::FNumber, e))
-        .filter(|e| e.is_some())
-        .map(|e| e.unwrap())
+        .flatten()
         .map(|e| e.to_f64())
         .collect::<Vec<f64>>();
 
-    apertures
-        .clone()
-        .into_iter()
-        .for_each(|f| debug!("f: {:?}", f));
+    apertures.iter().for_each(|f| debug!("Aperture: f{:?}", f));
 
     Ok(())
 }

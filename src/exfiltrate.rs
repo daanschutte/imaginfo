@@ -1,17 +1,17 @@
 use std::error::Error;
-use std::path::PathBuf;
+use std::path::Path;
 
 use exif::{Exif, In, Rational, Tag, Value};
-use log::{debug, error, info};
+use log::{debug, error};
 
-pub(crate) fn get_exif_data(path: &PathBuf) -> Result<Exif, Box<dyn Error>> {
+pub(crate) fn get_exif_data(path: &Path, debug: bool) -> Result<Exif, Box<dyn Error>> {
     let file = std::fs::File::open(path)?;
     let mut bufreader = std::io::BufReader::new(&file);
     let exifreader = exif::Reader::new();
     let exif = exifreader.read_from_container(&mut bufreader)?;
     for f in exif.fields() {
-        if f.tag != Tag::MakerNote && f.ifd_num != In::THUMBNAIL {
-            debug!("{} {}", f.tag, f.display_value().with_unit(&exif));
+        if debug && f.tag != Tag::MakerNote && f.ifd_num != In::THUMBNAIL {
+            debug!("{}: {}", f.tag, f.display_value().with_unit(&exif));
         }
     }
 
@@ -35,14 +35,9 @@ pub(crate) fn get_tag_rational(tag: Tag, e: &Exif) -> Option<&Rational> {
     }
 }
 
-pub(crate) fn get_field_as_str(tag: Tag, e: &Exif) -> Option<String> {
-    match e.get_field(tag, In::PRIMARY) {
-        Some(make) => match make.value.display_as(tag) {
-            val => {
-                info!("{}: {}", tag, val);
-                Option::Some(val.to_string())
-            }
-        },
+pub(crate) fn _get_field_as_str(tag: Tag, exif: &Exif) -> Option<String> {
+    match exif.get_field(tag, In::PRIMARY) {
+        Some(field) => Option::Some(field.display_value().with_unit(exif).to_string()),
         None => {
             error!("{} is missing", tag);
             Option::None
