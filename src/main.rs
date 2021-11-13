@@ -22,6 +22,14 @@ struct Opt {
     #[structopt(short = "D", long)]
     debug: bool,
 
+    /// Follow links
+    #[structopt(short, long)]
+    follow_links: bool,
+
+    /// Include hidden files
+    #[structopt(short = "H", long)]
+    hidden: bool,
+
     /// Follow directories recursively up to the maximum depth
     #[structopt(short, long)]
     recurse: bool,
@@ -36,26 +44,33 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let opt = Opt::from_args();
     let debug = opt.debug;
+    let hidden = opt.hidden;
+    let follow_links = opt.follow_links;
     let recurse = opt.recurse;
-    let max_depth: usize = if recurse { usize::MAX } else { opt.max_depth };
     let path = &opt.path;
+
+    let max_depth: Option<usize> = if recurse {
+        Option::None
+    } else {
+        Option::Some(opt.max_depth)
+    };
 
     if debug {
         debug!("{:?}", &opt);
     }
 
-    let files = dir_tools::find_files_recurse(path, debug, max_depth);
+    let files = dir_tools::find_files_recurse(path, debug, follow_links, hidden, max_depth);
 
     let exif_data = files
         .unwrap()
-        .into_iter()
-        .map(|path| exfiltrate::get_exif_data(&path, debug))
-        .filter_map(|e| e.ok())
+        .iter()
+        .map(|path| exfiltrate::get_exif_data(path, debug))
+        .filter_map(|exif| exif.ok())
         .collect::<Vec<Exif>>();
 
     let apertures: Vec<f64> = exif_data
         .iter()
-        .map(|e| exfiltrate::get_tag_rational(Tag::FNumber, e))
+        .map(|exif| exfiltrate::get_tag_rational(Tag::FNumber, exif))
         .flatten()
         .map(|e| e.to_f64())
         .collect::<Vec<f64>>();
