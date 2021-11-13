@@ -125,9 +125,8 @@ fn it_does_not_follow_symlinks_with_recursion() -> Result<(), Box<dyn std::error
     setup_cmd_debug_recurse(&mut cmd);
     cmd.assert()
         .success()
-        .stderr(predicate::str::contains("symlink_to_level1").not())
-        .stderr(predicate::str::contains("symlink_to_file0_1.txt").not())
-        .stderr(predicate::str::contains("symlink_to_file3.txt").not());
+        .stderr(predicate::str::contains("symlink_to_file0_1").not())
+        .stderr(predicate::str::contains("symlink_to_file3").not());
 
     Ok(())
 }
