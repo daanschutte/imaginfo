@@ -4,6 +4,7 @@ use assert_cmd::prelude::*;
 use predicates::prelude::*;
 
 // TODO use tempfile https://docs.rs/tempfile/3.2.0/tempfile/
+// The current implementation does not work well since we have to commit symlinks: boo :(
 
 fn setup_cmd_debug_recurse(cmd: &mut Command) {
     cmd.env("RUST_LOG", "debug")

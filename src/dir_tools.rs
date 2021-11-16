@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use ignore::types::{Types, TypesBuilder};
 use ignore::WalkBuilder;
-use log::debug;
+use log::{debug, error};
 
 pub(crate) fn find_files_recurse(
     path: &Path,
@@ -28,6 +28,7 @@ pub(crate) fn find_files_recurse(
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path().to_path_buf())
         .collect::<Vec<PathBuf>>();
+    // TODO add tests for the added features
 
     if debug {
         let _ = &paths
@@ -40,44 +41,60 @@ pub(crate) fn find_files_recurse(
 
 fn get_types() -> Result<Types, ignore::Error> {
     let mut builder = TypesBuilder::new();
-    builder.add("RWZ", ".RWZ");
-    builder.add("RW2", ".RW2");
-    builder.add("CR2", ".CR2");
-    builder.add("DNG", ".DNG");
-    builder.add("ERF", ".ERF");
-    builder.add("NRW", ".NRW");
-    builder.add("RAF", ".RAF");
-    builder.add("ARW", ".ARW");
-    builder.add("NEF", ".NEF");
-    builder.add("K25", ".K25");
-    builder.add("DNG", ".DNG");
-    builder.add("SRF", ".SRF");
-    builder.add("EIP", ".EIP");
-    builder.add("DCR", ".DCR");
-    builder.add("RAW", ".RAW");
-    builder.add("CRW", ".CRW");
-    builder.add("3FR", ".3FR");
-    builder.add("BAY", ".BAY");
-    builder.add("MEF", ".MEF");
-    builder.add("CS1", ".CS1");
-    builder.add("KDC", ".KDC");
-    builder.add("ORF", ".ORF");
-    builder.add("ARI", ".ARI");
-    builder.add("SR2", ".SR2");
-    builder.add("MOS", ".MOS");
-    builder.add("MFW", ".MFW");
-    builder.add("FFF", ".FFF");
-    builder.add("CR3", ".CR3");
-    builder.add("SRW", ".SRW");
-    builder.add("J6I", ".J6I");
-    builder.add("X3F", ".X3F");
-    builder.add("KC2", ".KC2");
-    builder.add("RWL", ".RWL");
-    builder.add("MRW", ".MRW");
-    builder.add("PEF", ".PEF");
-    builder.add("IIQ", ".IIQ");
-    builder.add("CXI", ".CXI");
-    builder.add("MDC", ".MD;C");
+
+    add_def(&mut builder, "RWZ", "*.RWZ");
+    add_def(&mut builder, "RW2", "*.RW2");
+    add_def(&mut builder, "CR2", "*.CR2");
+    add_def(&mut builder, "DNG", "*.DNG");
+    add_def(&mut builder, "ERF", "*.ERF");
+    add_def(&mut builder, "NRW", "*.NRW");
+    add_def(&mut builder, "RAF", "*.RAF");
+    add_def(&mut builder, "ARW", "*.ARW");
+    add_def(&mut builder, "NEF", "*.NEF");
+    add_def(&mut builder, "K25", "*.K25");
+    add_def(&mut builder, "DNG", "*.DNG");
+    add_def(&mut builder, "SRF", "*.SRF");
+    add_def(&mut builder, "EIP", "*.EIP");
+    add_def(&mut builder, "DCR", "*.DCR");
+    add_def(&mut builder, "RAW", "*.RAW");
+    add_def(&mut builder, "CRW", "*.CRW");
+    add_def(&mut builder, "3FR", "*.3FR");
+    add_def(&mut builder, "BAY", "*.BAY");
+    add_def(&mut builder, "MEF", "*.MEF");
+    add_def(&mut builder, "CS1", "*.CS1");
+    add_def(&mut builder, "KDC", "*.KDC");
+    add_def(&mut builder, "ORF", "*.ORF");
+    add_def(&mut builder, "ARI", "*.ARI");
+    add_def(&mut builder, "SR2", "*.SR2");
+    add_def(&mut builder, "MOS", "*.MOS");
+    add_def(&mut builder, "MFW", "*.MFW");
+    add_def(&mut builder, "FFF", "*.FFF");
+    add_def(&mut builder, "CR3", "*.CR3");
+    add_def(&mut builder, "SRW", "*.SRW");
+    add_def(&mut builder, "J6I", "*.J6I");
+    add_def(&mut builder, "X3F", "*.X3F");
+    add_def(&mut builder, "KC2", "*.KC2");
+    add_def(&mut builder, "RWL", "*.RWL");
+    add_def(&mut builder, "MRW", "*.MRW");
+    add_def(&mut builder, "PEF", "*.PEF");
+    add_def(&mut builder, "IIQ", "*.IIQ");
+    add_def(&mut builder, "CXI", "*.CXI");
+    add_def(&mut builder, "MDC", "*.MDC");
+
+    builder.select("all");
+    debug!(
+        "The following {} file types will be searched: {:?}",
+        &builder.definitions().len(),
+        &builder.definitions()
+    );
 
     builder.build()
+}
+
+fn add_def(builder: &mut TypesBuilder, name: &str, glob: &str) {
+    let builder = match builder.add(name, glob) {
+        Ok(b) => b,
+        Err(e) => error!("Could not add {}:{} to file types: {}", name, glob, e),
+    };
+    builder
 }
