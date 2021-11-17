@@ -4,7 +4,7 @@ use ignore::types::{Types, TypesBuilder};
 use ignore::WalkBuilder;
 use log::{debug, error};
 
-pub(crate) fn find_files_recurse(
+pub(crate) fn find_files(
     path: &Path,
     debug: bool,
     follow_links: bool,
@@ -25,15 +25,13 @@ pub(crate) fn find_files_recurse(
         .follow_links(follow_links)
         .types(types)
         .build()
-        .filter_map(|entry| entry.ok())
-        .map(|entry| entry.path().to_path_buf())
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().unwrap().is_file())
+        .map(|e| e.path().to_path_buf())
         .collect::<Vec<PathBuf>>();
-    // TODO add tests for the added features
 
     if debug {
-        let _ = &paths
-            .iter()
-            .for_each(|p| debug!("Found {}", p.display().to_string()));
+        debug!("Discovered {} image files", paths.len())
     }
 
     Ok(paths)
