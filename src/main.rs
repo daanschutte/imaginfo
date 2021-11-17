@@ -2,7 +2,7 @@ use std::error::Error;
 use std::path::PathBuf;
 
 use exif::{Exif, Tag};
-use log::debug;
+use log::{debug, error, info};
 use structopt::StructOpt;
 
 mod dir_tools;
@@ -59,12 +59,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         debug!("{:?}", &opt);
     }
 
-    let files = dir_tools::find_files_recurse(path, debug, follow_links, hidden, max_depth);
+    let files = dir_tools::find_files(path, debug, follow_links, hidden, max_depth);
 
     let exif_data = files
         .unwrap()
         .iter()
         .map(|path| exfiltrate::get_exif_data(path, debug))
+        .map(log_error)
         .filter_map(|exif| exif.ok())
         .collect::<Vec<Exif>>();
 
@@ -78,4 +79,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     apertures.iter().for_each(|f| debug!("Aperture: f{:?}", f));
 
     Ok(())
+}
+
+fn log_error(e: Result<Exif, Box<dyn Error>>) -> Result<Exif, ()> {
+    e.map_err(|err| error!("{:?}", err))
 }

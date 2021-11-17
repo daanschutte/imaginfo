@@ -4,6 +4,46 @@ use ignore::types::{Types, TypesBuilder};
 use ignore::WalkBuilder;
 use log::{debug, error};
 
+const FILE_TYPES: [(&str, &str); 37] = [
+    ("3FR", "*.3FR"),
+    ("ARI", "*.ARI"),
+    ("ARW", "*.ARW"),
+    ("BAY", "*.BAY"),
+    ("CR2", "*.CR2"),
+    ("CR3", "*.CR3"),
+    ("CRW", "*.CRW"),
+    ("CS1", "*.CS1"),
+    ("CXI", "*.CXI"),
+    ("DCR", "*.DCR"),
+    ("DNG", "*.DNG"),
+    ("EIP", "*.EIP"),
+    ("ERF", "*.ERF"),
+    ("FFF", "*.FFF"),
+    ("IIQ", "*.IIQ"),
+    ("J6I", "*.J6I"),
+    ("K25", "*.K25"),
+    ("KC2", "*.KC2"),
+    ("KDC", "*.KDC"),
+    ("MDC", "*.MDC"),
+    ("MEF", "*.MEF"),
+    ("MFW", "*.MFW"),
+    ("MOS", "*.MOS"),
+    ("MRW", "*.MRW"),
+    ("NEF", "*.NEF"),
+    ("NRW", "*.NRW"),
+    ("ORF", "*.ORF"),
+    ("PEF", "*.PEF"),
+    ("RAF", "*.RAF"),
+    ("RAW", "*.RAW"),
+    ("RW2", "*.RW2"),
+    ("RWL", "*.RWL"),
+    ("RWZ", "*.RWZ"),
+    ("SR2", "*.SR2"),
+    ("SRF", "*.SRF"),
+    ("SRW", "*.SRW"),
+    ("X3F", "*.X3F"),
+];
+
 pub(crate) fn find_files(
     path: &Path,
     debug: bool,
@@ -40,44 +80,7 @@ pub(crate) fn find_files(
 fn get_types() -> Result<Types, ignore::Error> {
     let mut builder = TypesBuilder::new();
 
-    add_def(&mut builder, "RWZ", "*.RWZ");
-    add_def(&mut builder, "RW2", "*.RW2");
-    add_def(&mut builder, "CR2", "*.CR2");
-    add_def(&mut builder, "DNG", "*.DNG");
-    add_def(&mut builder, "ERF", "*.ERF");
-    add_def(&mut builder, "NRW", "*.NRW");
-    add_def(&mut builder, "RAF", "*.RAF");
-    add_def(&mut builder, "ARW", "*.ARW");
-    add_def(&mut builder, "NEF", "*.NEF");
-    add_def(&mut builder, "K25", "*.K25");
-    add_def(&mut builder, "DNG", "*.DNG");
-    add_def(&mut builder, "SRF", "*.SRF");
-    add_def(&mut builder, "EIP", "*.EIP");
-    add_def(&mut builder, "DCR", "*.DCR");
-    add_def(&mut builder, "RAW", "*.RAW");
-    add_def(&mut builder, "CRW", "*.CRW");
-    add_def(&mut builder, "3FR", "*.3FR");
-    add_def(&mut builder, "BAY", "*.BAY");
-    add_def(&mut builder, "MEF", "*.MEF");
-    add_def(&mut builder, "CS1", "*.CS1");
-    add_def(&mut builder, "KDC", "*.KDC");
-    add_def(&mut builder, "ORF", "*.ORF");
-    add_def(&mut builder, "ARI", "*.ARI");
-    add_def(&mut builder, "SR2", "*.SR2");
-    add_def(&mut builder, "MOS", "*.MOS");
-    add_def(&mut builder, "MFW", "*.MFW");
-    add_def(&mut builder, "FFF", "*.FFF");
-    add_def(&mut builder, "CR3", "*.CR3");
-    add_def(&mut builder, "SRW", "*.SRW");
-    add_def(&mut builder, "J6I", "*.J6I");
-    add_def(&mut builder, "X3F", "*.X3F");
-    add_def(&mut builder, "KC2", "*.KC2");
-    add_def(&mut builder, "RWL", "*.RWL");
-    add_def(&mut builder, "MRW", "*.MRW");
-    add_def(&mut builder, "PEF", "*.PEF");
-    add_def(&mut builder, "IIQ", "*.IIQ");
-    add_def(&mut builder, "CXI", "*.CXI");
-    add_def(&mut builder, "MDC", "*.MDC");
+    FILE_TYPES.map(|t| add_def(&mut builder, t.0, t.1));
 
     builder.select("all");
     debug!(

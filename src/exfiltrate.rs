@@ -5,6 +5,7 @@ use exif::{Exif, In, Rational, Tag, Value};
 use log::{debug, error};
 
 pub(crate) fn get_exif_data(path: &Path, debug: bool) -> Result<Exif, Box<dyn Error>> {
+    debug!("Reading file {}", path.display());
     let file = std::fs::File::open(path)?;
     let mut bufreader = std::io::BufReader::new(&file);
     let exifreader = exif::Reader::new();
