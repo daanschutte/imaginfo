@@ -22,6 +22,10 @@ struct Opt {
     #[structopt(short = "D", long)]
     debug: bool,
 
+    /// Print all RAW data from processed image files
+    #[structopt(short = "i", long)]
+    debug_image_info: bool,
+
     /// Follow links
     #[structopt(short, long)]
     follow_links: bool,
@@ -44,6 +48,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let opt = Opt::from_args();
     let debug = opt.debug;
+    let debug_image_info = opt.debug_image_info;
     let hidden = opt.hidden;
     let follow_links = opt.follow_links;
     let recurse = opt.recurse;
@@ -64,7 +69,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let exif_data = files
         .unwrap()
         .iter()
-        .map(|path| exfiltrate::get_exif_data(path, debug))
+        .map(|path| exfiltrate::get_exif_data(path, debug_image_info))
         .map(log_error)
         .filter_map(|exif| exif.ok())
         .collect::<Vec<Exif>>();

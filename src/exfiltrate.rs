@@ -4,15 +4,18 @@ use std::path::Path;
 use exif::{Exif, In, Rational, Tag, Value};
 use log::{debug, error};
 
-pub(crate) fn get_exif_data(path: &Path, debug: bool) -> Result<Exif, Box<dyn Error>> {
+pub(crate) fn get_exif_data(path: &Path, debug_image_info: bool) -> Result<Exif, Box<dyn Error>> {
     debug!("Reading file {}", path.display());
     let file = std::fs::File::open(path)?;
     let mut bufreader = std::io::BufReader::new(&file);
     let exifreader = exif::Reader::new();
     let exif = exifreader.read_from_container(&mut bufreader)?;
-    for f in exif.fields() {
-        if debug && f.tag != Tag::MakerNote && f.ifd_num != In::THUMBNAIL {
-            debug!("{}: {}", f.tag, f.display_value().with_unit(&exif));
+    if debug_image_info {
+        for f in exif.fields() {
+            // TODO remove filters
+            if f.tag != Tag::MakerNote && f.ifd_num != In::THUMBNAIL {
+                debug!("{}: {}", f.tag, f.display_value().with_unit(&exif));
+            }
         }
     }
 
