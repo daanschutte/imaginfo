@@ -5,6 +5,8 @@ use ignore::WalkBuilder;
 use log::{debug, error};
 
 const FILE_TYPES: [(&str, &str); 37] = [
+    // TODO test which files have native EXIF support
+    // TODO create meaningful names according to manufacturer
     ("3FR", "*.3FR"),
     ("ARI", "*.ARI"),
     ("ARW", "*.ARW"),
@@ -56,7 +58,12 @@ pub(crate) fn find_files(
         max_depth.unwrap_or(usize::MAX)
     );
 
-    let types = get_types().unwrap_or(TypesBuilder::new().add_defaults().build()?);
+    let types = get_types(Vec::from(FILE_TYPES)).unwrap_or(
+        TypesBuilder::new()
+            .add_defaults()
+            .build()
+            .expect("failed to build file type definitions"),
+    );
 
     let paths = WalkBuilder::new(path)
         .max_depth(max_depth)
@@ -75,10 +82,12 @@ pub(crate) fn find_files(
     Ok(paths)
 }
 
-fn get_types() -> Result<Types, ignore::Error> {
+fn get_types(file_types: Vec<(&str, &str)>) -> Result<Types, ignore::Error> {
     let mut builder = TypesBuilder::new();
 
-    FILE_TYPES.map(|t| add_def(&mut builder, t.0, t.1));
+    file_types
+        .iter()
+        .for_each(|t| add_def(&mut builder, t.0, t.1));
 
     builder.select("all");
     debug!(
@@ -96,4 +105,45 @@ fn add_def(builder: &mut TypesBuilder, name: &str, glob: &str) {
         Err(e) => error!("Could not add {}:{} to file types: {}", name, glob, e),
     };
     builder
+}
+
+#[cfg(test)]
+mod tests {
+    use std::ops::Index;
+
+    use super::*;
+
+    #[test]
+    fn test_add_def() {
+        let mut builder = TypesBuilder::new();
+        add_def(&mut builder, "test", ".tst");
+
+        assert_eq!(builder.definitions().len(), 1);
+        assert_eq!(builder.definitions().index(0).name(), "test");
+        assert_eq!(builder.definitions().index(0).globs().len(), 1);
+        assert_eq!(builder.definitions().index(0).globs().index(0), ".tst");
+    }
+
+    #[test]
+    fn test_get_types() {
+        let file_types: [(&str, &str); 4] = [
+            ("0", "*.one"),
+            ("1", "*.two"),
+            ("1", "*.two2"),
+            ("2", "*.three"),
+        ];
+        let types = get_types(Vec::from(file_types)).unwrap();
+
+        assert_eq!(types.definitions().len(), 3);
+        assert_eq!(types.definitions().index(0).name(), "0");
+        assert_eq!(types.definitions().index(0).globs().len(), 1);
+        assert_eq!(types.definitions().index(0).globs().index(0), "*.one");
+        assert_eq!(types.definitions().index(1).name(), "1");
+        assert_eq!(types.definitions().index(1).globs().len(), 2);
+        assert_eq!(types.definitions().index(1).globs().index(0), "*.two");
+        assert_eq!(types.definitions().index(1).globs().index(1), "*.two2");
+        assert_eq!(types.definitions().index(2).name(), "2");
+        assert_eq!(types.definitions().index(2).globs().len(), 1);
+        assert_eq!(types.definitions().index(2).globs().index(0), "*.three");
+    }
 }

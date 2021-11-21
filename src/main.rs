@@ -76,7 +76,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         .map(|e| e.to_f64())
         .collect::<Vec<f64>>();
 
-    apertures.iter().for_each(|f| debug!("Aperture: f{:?}", f));
+    info!(
+        "Average aperture: f{}",
+        apertures.iter().sum::<f64>() / apertures.len() as f64
+    );
 
     Ok(())
 }
