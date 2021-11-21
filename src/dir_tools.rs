@@ -58,12 +58,12 @@ pub(crate) fn find_files(
         max_depth.unwrap_or(usize::MAX)
     );
 
-    let types = get_types(Vec::from(FILE_TYPES)).unwrap_or(
+    let types = get_types(Vec::from(FILE_TYPES)).unwrap_or_else(|_| {
         TypesBuilder::new()
             .add_defaults()
             .build()
-            .expect("failed to build file type definitions"),
-    );
+            .expect("failed to build file type definitions")
+    });
 
     let paths = WalkBuilder::new(path)
         .max_depth(max_depth)
