@@ -12,7 +12,3 @@ ignore = "0.4"
 kamadak-exif = "0.5"
 log = "0.4"
 structopt = "0.3"
-
-[dev-dependencies]
-assert_cmd = "2.0"
-predicates = "2.0"

@@ -30,7 +30,7 @@ struct Opt {
     #[structopt(short, long)]
     follow_links: bool,
 
-    /// Follow directories recursively up to the maximum depth
+    /// Follow directories recursively up to the maximum depth, ignoring <max-depth>.
     #[structopt(short, long)]
     recurse: bool,
 
@@ -69,7 +69,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .filter_map(|exif| exif.ok())
         .collect::<Vec<Exif>>();
 
-    let apertures: Vec<f64> = exif_data
+    let apertures = exif_data
         .iter()
         .map(|exif| exfiltrate::get_tag_rational(Tag::FNumber, exif))
         .flatten()
