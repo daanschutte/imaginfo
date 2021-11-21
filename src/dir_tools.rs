@@ -48,7 +48,6 @@ pub(crate) fn find_files(
     path: &Path,
     debug: bool,
     follow_links: bool,
-    hidden: bool,
     max_depth: Option<usize>,
 ) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
     debug!(
@@ -60,7 +59,6 @@ pub(crate) fn find_files(
     let types = get_types().unwrap_or(TypesBuilder::new().add_defaults().build()?);
 
     let paths = WalkBuilder::new(path)
-        .hidden(hidden)
         .max_depth(max_depth)
         .follow_links(follow_links)
         .types(types)

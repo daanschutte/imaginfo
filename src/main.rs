@@ -30,10 +30,6 @@ struct Opt {
     #[structopt(short, long)]
     follow_links: bool,
 
-    /// Include hidden files
-    #[structopt(short = "H", long)]
-    hidden: bool,
-
     /// Follow directories recursively up to the maximum depth
     #[structopt(short, long)]
     recurse: bool,
@@ -49,7 +45,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let opt = Opt::from_args();
     let debug = opt.debug;
     let debug_image_info = opt.debug_image_info;
-    let hidden = opt.hidden;
     let follow_links = opt.follow_links;
     let recurse = opt.recurse;
     let path = &opt.path;
@@ -64,7 +59,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         debug!("{:?}", &opt);
     }
 
-    let files = dir_tools::find_files(path, debug, follow_links, hidden, max_depth);
+    let files = dir_tools::find_files(path, debug, follow_links, max_depth);
 
     let exif_data = files
         .unwrap()
