@@ -69,7 +69,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .filter_map(|res| res.ok())
         .map(|(p, e)| exif_tools::exif_to_image(p, &e))
         .filter_map(|image| image.ok())
-        .for_each(|i| database::insert_image(&conn, &i));
+        .for_each(|i| database::insert_sony(&conn, &i));
 
     Ok(())
 }

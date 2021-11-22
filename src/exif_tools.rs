@@ -4,10 +4,11 @@ use std::path::Path;
 use exif::{Exif, In, Rational, Tag, Value};
 use log::{debug, error};
 
-use crate::database::Image;
+use crate::database::SonyImage;
 
 /// Reads the specified file from disk and attempts to parse all the exif data from the image file.
 /// For greater verbosity the `debug_image_info` flag should be set.
+// TODO should we parse this per manufacturer?
 pub(crate) fn get_exif_data(
     path: &Path,
     debug_image_info: bool,
@@ -32,15 +33,13 @@ pub(crate) fn get_exif_data(
 
 /// Attempt to create an `Image` from an `Exif`, useful for persisting relevant image information.
 /// Returns a `std::Error` if any of there are any conversion failures.
-pub(crate) fn exif_to_image(path: &Path, exif: &Exif) -> Result<Image, Box<dyn Error>> {
+pub(crate) fn exif_to_image(path: &Path, exif: &Exif) -> Result<SonyImage, Box<dyn Error>> {
     let id = -1;
-    let image_unique_id = get_image_unique_id(exif).unwrap();
     let filename = get_filename(path).unwrap().to_string();
     let f_number = get_f_number(exif).unwrap();
 
-    let image = Image {
+    let image = SonyImage {
         id,
-        image_unique_id,
         filename,
         f_number,
     };
@@ -66,7 +65,7 @@ fn get_tag_rational(tag: Tag, e: &Exif) -> Option<&Rational> {
     }
 }
 
-fn get_field_as_str(tag: Tag, exif: &Exif) -> Option<String> {
+fn _get_field_as_str(tag: Tag, exif: &Exif) -> Option<String> {
     match exif.get_field(tag, In::PRIMARY) {
         Some(field) => Option::Some(field.display_value().with_unit(exif).to_string()),
         None => {
@@ -88,21 +87,12 @@ pub(crate) fn get_f_number(exif: &Exif) -> Option<f64> {
     get_tag_rational(Tag::FNumber, exif).map(|r| r.to_f64())
 }
 
-pub(crate) fn get_image_unique_id(exif: &Exif) -> Option<String> {
-    get_field_as_str(Tag::ImageUniqueID, exif)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_exif_to_image() {
-        todo!()
-    }
-
-    #[test]
-    fn test_get_image_unique_id() {
         todo!()
     }
 
