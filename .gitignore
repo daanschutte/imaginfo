@@ -48,6 +48,9 @@ Cargo.lock
 # CMake
 cmake-build-*/
 
+# Database
+*.db3
+
 # File-based project format
 *.iws
 

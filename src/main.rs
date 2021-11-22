@@ -1,10 +1,12 @@
 use std::error::Error;
 use std::path::PathBuf;
 
+use crate::database::get_connection;
 use exif::{Exif, Tag};
 use log::{debug, error, info};
 use structopt::StructOpt;
 
+mod database;
 mod dir_tools;
 mod exfiltrate;
 
@@ -41,6 +43,7 @@ struct Opt {
 
 fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
+    let _db = database::get_connection("./db.db3");
 
     let opt = Opt::from_args();
     let debug = opt.debug;
@@ -69,13 +72,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         .filter_map(|exif| exif.ok())
         .collect::<Vec<Exif>>();
 
+    // TODO drop testing code
     let apertures = exif_data
         .iter()
         .map(|exif| exfiltrate::get_tag_rational(Tag::FNumber, exif))
         .flatten()
         .map(|e| e.to_f64())
         .collect::<Vec<f64>>();
-
     info!(
         "Average aperture: f{}",
         apertures.iter().sum::<f64>() / apertures.len() as f64
