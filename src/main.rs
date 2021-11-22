@@ -1,14 +1,13 @@
 use std::error::Error;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use crate::database::get_connection;
-use exif::{Exif, Tag};
-use log::{debug, error, info};
+use exif::Exif;
+use log::{debug, error};
 use structopt::StructOpt;
 
 mod database;
-mod dir_tools;
-mod exfiltrate;
+mod dir;
+mod exif_tools;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -43,14 +42,14 @@ struct Opt {
 
 fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
-    let _db = database::get_connection("./db.db3");
+    let conn = database::get_connection("./db.db3")?;
 
     let opt = Opt::from_args();
     let debug = opt.debug;
     let debug_image_info = opt.debug_image_info;
     let follow_links = opt.follow_links;
     let recurse = opt.recurse;
-    let path = &opt.path;
+    let path: &PathBuf = &opt.path;
 
     let max_depth: Option<usize> = if recurse {
         Option::None
@@ -62,31 +61,19 @@ fn main() -> Result<(), Box<dyn Error>> {
         debug!("{:?}", &opt);
     }
 
-    let files = dir_tools::find_files(path, debug, follow_links, max_depth);
-
-    let exif_data = files
+    dir::find_files(path, debug, follow_links, max_depth)
         .unwrap()
         .iter()
-        .map(|path| exfiltrate::get_exif_data(path, debug_image_info))
+        .map(|path| exif_tools::get_exif_data(path, debug_image_info))
         .map(log_error)
-        .filter_map(|exif| exif.ok())
-        .collect::<Vec<Exif>>();
-
-    // TODO drop testing code
-    let apertures = exif_data
-        .iter()
-        .map(|exif| exfiltrate::get_tag_rational(Tag::FNumber, exif))
-        .flatten()
-        .map(|e| e.to_f64())
-        .collect::<Vec<f64>>();
-    info!(
-        "Average aperture: f{}",
-        apertures.iter().sum::<f64>() / apertures.len() as f64
-    );
+        .filter_map(|res| res.ok())
+        .map(|(p, e)| exif_tools::exif_to_image(p, &e))
+        .filter_map(|image| image.ok())
+        .for_each(|i| database::insert_image(&conn, &i));
 
     Ok(())
 }
 
-fn log_error(e: Result<Exif, Box<dyn Error>>) -> Result<Exif, ()> {
+fn log_error(e: Result<(&Path, Exif), Box<dyn Error>>) -> Result<(&Path, Exif), ()> {
     e.map_err(|err| error!("{:?}", err))
 }
