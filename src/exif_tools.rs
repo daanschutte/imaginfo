@@ -85,3 +85,33 @@ pub(crate) fn get_filename(path: &Path) -> Result<&str, Box<dyn Error>> {
 pub(crate) fn get_f_number(exif: &Exif) -> Option<f64> {
     get_tag_rational(Tag::FNumber, exif).map(|r| r.to_f64())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_exif_to_image() {
+        todo!()
+    }
+
+    #[test]
+    fn test_get_filename() {
+        todo!()
+    }
+
+    #[test]
+    fn test_get_f_number() {
+        todo!()
+    }
+
+    #[test]
+    fn test_get_tag_rational() {
+        todo!()
+    }
+
+    #[test]
+    fn test_get_field_as_string() {
+        todo!()
+    }
+}

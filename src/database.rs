@@ -39,13 +39,3 @@ pub(crate) fn insert_image(conn: &Connection, image: &Image) {
         Err(err) => error!("Error adding {} to the database: {}", &image.filename, err),
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_exif_to_image() {
-        assert_eq!(true, false);
-    }
-}
