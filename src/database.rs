@@ -25,7 +25,8 @@ pub(crate) fn get_connection(path: &str) -> Result<Connection, Box<dyn Error>> {
                 id              INTEGER PRIMARY KEY,
                 filename        TEXT,
                 timestamp       INTEGER NOT NULL,
-                f_number        REAL
+                f_number        REAL,
+                UNIQUE(filename, timestamp) ON CONFLICT IGNORE
             )",
         [],
     )?;
@@ -33,13 +34,12 @@ pub(crate) fn get_connection(path: &str) -> Result<Connection, Box<dyn Error>> {
     Ok(conn)
 }
 
-// TODO only add image if it is unique - use datetime?
 pub(crate) fn insert_sony(conn: &Connection, image: &SonyImage) {
     match conn.execute(
         "INSERT INTO sony_arw(filename, timestamp, f_number) VALUES (?1, ?2, ?3)",
         params![&image.filename, &image.timestamp, &image.f_number],
     ) {
-        Ok(_) => debug!("{} was added to the database", &image.filename),
+        Ok(_) => debug!("{} processed successfully", &image.filename),
         Err(err) => error!("Error adding {} to the database: {}", &image.filename, err),
     }
 }
