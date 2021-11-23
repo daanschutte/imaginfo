@@ -9,6 +9,7 @@ use rusqlite::{params, Connection, Result};
 pub(crate) struct SonyImage {
     pub id: i32,
     pub filename: String,
+    pub timestamp: i64,
     pub f_number: f64,
 }
 
@@ -23,6 +24,7 @@ pub(crate) fn get_connection(path: &str) -> Result<Connection, Box<dyn Error>> {
             (
                 id              INTEGER PRIMARY KEY,
                 filename        TEXT,
+                timestamp       INTEGER NOT NULL,
                 f_number        REAL
             )",
         [],
@@ -34,8 +36,8 @@ pub(crate) fn get_connection(path: &str) -> Result<Connection, Box<dyn Error>> {
 // TODO only add image if it is unique - use datetime?
 pub(crate) fn insert_sony(conn: &Connection, image: &SonyImage) {
     match conn.execute(
-        "INSERT INTO sony_arw(filename, f_number) VALUES (?1, ?2)",
-        params![&image.filename, &image.f_number],
+        "INSERT INTO sony_arw(filename, timestamp, f_number) VALUES (?1, ?2, ?3)",
+        params![&image.filename, &image.timestamp, &image.f_number],
     ) {
         Ok(_) => debug!("{} was added to the database", &image.filename),
         Err(err) => error!("Error adding {} to the database: {}", &image.filename, err),
