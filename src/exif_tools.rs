@@ -118,11 +118,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_exif_to_image() {
-        todo!()
-    }
-
-    #[test]
     fn test_get_filename() {
         let path1 = Path::new("path.ARW");
         let path2 = Path::new("/this/is/a/path.CR2");
@@ -139,20 +134,5 @@ mod tests {
         assert_eq!(get_filename(&path5).unwrap(), "p@th_with-other0chars.ARW");
         assert_eq!(get_filename(&path6).unwrap(), "p@th_with-other0chars.ARW");
         assert_eq!(get_filename(&path7).unwrap(), "p@th_with-other0chars.ARW");
-    }
-
-    #[test]
-    fn test_get_f_number() {
-        todo!()
-    }
-
-    #[test]
-    fn test_get_tag_rational() {
-        todo!()
-    }
-
-    #[test]
-    fn test_get_field_as_string() {
-        todo!()
     }
 }
