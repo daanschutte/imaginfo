@@ -100,7 +100,7 @@ pub(crate) fn get_original_date_time(exif: &Exif, fmt: &str) -> Option<DateTime<
     let ot = get_field_as_str(Tag::OffsetTimeOriginal, exif)
         .expect("OffsetTimeOriginal field is broken/missing");
 
-    dt.push_str(" ");
+    dt.push(' ');
     dt.push_str(ot.as_str().trim_matches('"'));
 
     match DateTime::parse_from_str(dt.as_str(), fmt) {
@@ -129,12 +129,12 @@ mod tests {
         let path6 = Path::new("path/p@th_with-other0chars.ARW");
         let path7 = Path::new("path\\p@th_with-other0chars.ARW");
 
-        assert_eq!(get_filename(&path1).unwrap(), "path.ARW");
-        assert_eq!(get_filename(&path2).unwrap(), "path.CR2");
-        assert_eq!(get_filename(&path3).unwrap(), "path.RAW");
-        assert_eq!(get_filename(&path4).unwrap(), "path.RAF");
-        assert_eq!(get_filename(&path5).unwrap(), "p@th_with-other0chars.ARW");
-        assert_eq!(get_filename(&path6).unwrap(), "p@th_with-other0chars.ARW");
-        assert_eq!(get_filename(&path7).unwrap(), "p@th_with-other0chars.ARW");
+        assert_eq!(get_filename(path1).unwrap(), "path.ARW");
+        assert_eq!(get_filename(path2).unwrap(), "path.CR2");
+        assert_eq!(get_filename(path3).unwrap(), "path.RAW");
+        assert_eq!(get_filename(path4).unwrap(), "path.RAF");
+        assert_eq!(get_filename(path5).unwrap(), "p@th_with-other0chars.ARW");
+        assert_eq!(get_filename(path6).unwrap(), "p@th_with-other0chars.ARW");
+        assert_eq!(get_filename(path7).unwrap(), "p@th_with-other0chars.ARW");
     }
 }
