@@ -10,15 +10,13 @@ pub(crate) struct SonyImage {
     pub id: i32,
     pub filename: String,
     pub timestamp: i64,
-    pub f_number: f64,
+    pub f_number: Option<f64>,
 }
 
 pub(crate) fn get_connection(path: &str) -> Result<Connection, Box<dyn Error>> {
     let path = PathBuf::from_str(path)?;
     let conn = Connection::open(path)?;
 
-    // TODO how do we run migrations? (probably rebuild the db?
-    //      this will cause us to lose data on images that are no longer present)
     conn.execute(
         "CREATE TABLE IF NOT EXISTS sony_arw
             (

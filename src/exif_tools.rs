@@ -16,7 +16,7 @@ pub(crate) fn get_exif_data(
     path: &Path,
     debug_image_info: bool,
 ) -> Result<(&Path, Exif), Box<dyn Error>> {
-    debug!("Reading file {}", path.display());
+    debug!("Processing file {}", path.display());
     let file = std::fs::File::open(path)?;
     let mut bufreader = std::io::BufReader::new(&file);
     let exifreader = exif::Reader::new();
@@ -42,7 +42,7 @@ pub(crate) fn exif_to_image(path: &Path, exif: &Exif) -> Result<SonyImage, Box<d
     let datetime = get_original_date_time(exif, DATE_TIME_FORMAT)
         .unwrap()
         .timestamp();
-    let f_number = get_f_number(exif).unwrap();
+    let f_number = get_f_number(exif);
 
     let image = SonyImage {
         id,
@@ -95,8 +95,10 @@ pub(crate) fn get_f_number(exif: &Exif) -> Option<f64> {
 }
 
 pub(crate) fn get_original_date_time(exif: &Exif, fmt: &str) -> Option<DateTime<Utc>> {
-    let mut dt = get_field_as_str(Tag::DateTimeOriginal, exif).unwrap();
-    let ot = get_field_as_str(Tag::OffsetTimeOriginal, exif).unwrap();
+    let mut dt = get_field_as_str(Tag::DateTimeOriginal, exif)
+        .expect("DateTimeOriginal field is broken/missing");
+    let ot = get_field_as_str(Tag::OffsetTimeOriginal, exif)
+        .expect("OffsetTimeOriginal field is broken/missing");
 
     dt.push_str(" ");
     dt.push_str(ot.as_str().trim_matches('"'));
