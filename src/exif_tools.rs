@@ -124,17 +124,13 @@ mod tests {
         let path1 = Path::new("path.ARW");
         let path2 = Path::new("/this/is/a/path.CR2");
         let path3 = Path::new("../../path.RAW");
-        let path4 = Path::new("..\\..\\path.RAF");
-        let path5 = Path::new("p@th_with-other0chars.ARW");
-        let path6 = Path::new("path/p@th_with-other0chars.ARW");
-        let path7 = Path::new("path\\p@th_with-other0chars.ARW");
+        let path4 = Path::new("p@th_with-other0chars.ARW");
+        let path5 = Path::new("path/p@th_with-other0chars.ARW");
 
         assert_eq!(get_filename(path1).unwrap(), "path.ARW");
         assert_eq!(get_filename(path2).unwrap(), "path.CR2");
         assert_eq!(get_filename(path3).unwrap(), "path.RAW");
-        assert_eq!(get_filename(path4).unwrap(), "path.RAF");
+        assert_eq!(get_filename(path4).unwrap(), "p@th_with-other0chars.ARW");
         assert_eq!(get_filename(path5).unwrap(), "p@th_with-other0chars.ARW");
-        assert_eq!(get_filename(path6).unwrap(), "p@th_with-other0chars.ARW");
-        assert_eq!(get_filename(path7).unwrap(), "p@th_with-other0chars.ARW");
     }
 }
